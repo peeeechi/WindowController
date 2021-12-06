@@ -112,6 +112,16 @@ namespace WindowController
         public static extern bool EnumChildWindows([In] IntPtr hWndParent, [In] EnumWindowsDelegate lpEnumFunc, [In] IntPtr lParam);
 
         /// <summary>
+        /// クラス名とウィンドウ名が指定された文字列と一致するトップレベルウィンドウへのハンドルを取得します<br/>この関数は子ウィンドウを検索しません<br/>この関数は大文字と小文字を区別する検索を実行しません<br/>指定した子ウィンドウから始めて子ウィンドウを検索するには、FindWindowEx関数を使用します<br/>
+        /// https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-findwindowa
+        /// </summary>
+        /// <param name="lpClassName">RegisterClassまたはRegisterClassEx関数への以前の呼び出しによって作成されたクラス名またはクラスアトム<br/>アトムはlpClassNameの下位ワードに含まれている必要があります<br/>上位ワードはゼロでなければなりません<br/>lpClassNameが文字列を指す場合、ウィンドウクラス名を指定します<br/>クラス名は、RegisterClassまたはRegisterClassExに登録されている任意の名前、または事前定義されたコントロールクラス名のいずれかです<br/>lpClassNameがNULLの場合、タイトルがlpWindowNameパラメーターと一致するウィンドウを検索します<br/></param>
+        /// <param name="lpWindowName">ウィンドウ名（ウィンドウのタイトル）<br/>このパラメータがNULLの場合、すべてのウィンドウ名が一致します<br/></param>
+        /// <returns></returns>
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        public static extern IntPtr FindWindow([In] string lpClassName, [In] string lpWindowName);
+
+        /// <summary>
         /// 指定されたウィンドウが属するクラスの名前を取得します<br/>
         /// </summary>
         /// <see cref="https://docs.microsoft.com/ja-jp/windows/win32/api/winuser/nf-winuser-getclassname"/>
@@ -162,7 +172,12 @@ namespace WindowController
         /// <returns>関数が成功した場合、戻り値はゼロ以外です<br/>関数が失敗した場合、戻り値はゼロです<br/>拡張エラー情報を取得するには、GetLastError関数を呼び出します<br/></returns>
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool GetWindowInfo([In] IntPtr hwnd, [MarshalAs(UnmanagedType.LPStruct), In, Out] WINDOWINFO pwi);
+        public static extern bool GetWindowInfo([In] IntPtr hwnd, [In, Out] ref WINDOWINFO pwi);
+
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool SetForegroundWindow([In] IntPtr hwnd);
 
 
         /// <summary>
@@ -268,7 +283,7 @@ namespace WindowController
         /// <param name="dwThreadId">フックプロシージャが関連付けられるスレッドの識別子<br/>デスクトップアプリの場合、このパラメーターがゼロの場合、フックプロシージャは、呼び出し元のスレッドと同じデスクトップで実行されているすべての既存のスレッドに関連付けられます<br/>Windows Storeアプリについては、「備考」セクションを参照してください<br/></param>
         /// <returns>関数が成功した場合、戻り値はフックプロシージャへのハンドルです<br/>関数が失敗した場合、戻り値はNULLです<br/>拡張エラー情報を取得するには、GetLastErrorを呼び出します<br/></returns>
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        public static extern IntPtr SetWindowsHookEx([In] HookType idHook, [MarshalAs(UnmanagedType.FunctionPtr), In] HOOKPROC lpfn, [In] IntPtr hMod, [In] IntPtr dwThreadId);
+        public static extern IntPtr SetWindowsHookEx([In] HookType idHook, [MarshalAs(UnmanagedType.FunctionPtr), In] HOOKPROC lpfn, [In] IntPtr hMod, [In] UInt32 dwThreadId);
 
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         private static extern IntPtr SetWindowsHookEx([In] HookType idHook, [MarshalAs(UnmanagedType.FunctionPtr), In] MouseProcHookCallback lpfn, [In] IntPtr hMod, [In] IntPtr dwThreadId);
@@ -407,7 +422,8 @@ namespace WindowController
         /// <returns>関数が成功した場合、戻り値はゼロ以外です<br/>関数が失敗した場合、戻り値はゼロです<br/>拡張エラー情報を取得するには、GetLastErrorを呼び出します<br/></returns>
         [DllImport("user32.dll", CharSet =CharSet.Auto, SetLastError =true)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool GetWindowRect([In] IntPtr hWnd, [MarshalAs(UnmanagedType.LPStruct), Out] RECT lpRect);
+        public static extern bool GetWindowRect([In] IntPtr hWnd, [Out] out RECT lpRect);
+        // public static extern bool GetWindowRect([In] IntPtr hWnd, [MarshalAs(UnmanagedType.LPStruct), Out] out RECT lpRect);
 
         /// <summary>
         /// 子、ポップアップ、またはトップレベルウィンドウのサイズ、位置、およびZオーダーを変更します<br/>これらのウィンドウは、画面上の外観に従って順序付けられています<br/>最上位のウィンドウは最高ランクを受け取り、Zオーダーの最初のウィンドウです<br/>

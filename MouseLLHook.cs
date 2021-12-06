@@ -4,32 +4,18 @@ using System.Runtime.InteropServices;
 
 namespace WindowController
 {
-    public class MouseLLHook: IDisposable
+    public class MouseLLHook: Hook
     {
         public delegate void MouseButtonActionHandler(POINT p);
         public delegate void MouseWheelSpinHandler(int wheelAmount);
 
-        public MouseLLHook()
-        {
-            _proc = new HOOKPROC(this.MouseHookCallback);
-            using (Process currentProcess = Process.GetCurrentProcess())
-            using (ProcessModule currentModule = currentProcess.MainModule)
-            {
-                // メソッドをマウスのイベントに紐づける。
-                _mouseHookId = NativeMethods.SetWindowsHookEx(HookType.WH_MOUSE_LL, _proc, NativeMethods.GetModuleHandle(currentModule.ModuleName), IntPtr.Zero);
-            }
-        }
+        public MouseLLHook(UInt32 threadId=0): base(HookType.WH_MOUSE_LL, threadId){}
 
         ~MouseLLHook()
         {
             // このコードを変更しないでください。クリーンアップ コードを 'Dispose(bool disposing)' メソッドに記述します
-            Dispose(disposing: false);
+            base.Dispose(disposing: false);
         }
-
-        private bool disposedValue;
-        private IntPtr _mouseHookId = IntPtr.Zero;
-
-        private HOOKPROC _proc;
 
         #region Events
         public event MouseButtonActionHandler OnLeftButtonDown;
@@ -42,12 +28,12 @@ namespace WindowController
         public event MouseWheelSpinHandler OnWheelSpin;
         #endregion
 
-        private IntPtr MouseHookCallback(int nCode, IntPtr wParam, IntPtr lParam)
+        protected override IntPtr HookCallback(int nCode, IntPtr wParam, IntPtr lParam)
         {
             if (nCode < 0)
             {
                 // マウスのイベントに紐付けられた次のメソッドを実行する。メソッドがなければ処理終了。
-                return NativeMethods.CallNextHookEx(_mouseHookId, nCode, wParam, lParam);
+                return NativeMethods.CallNextHookEx(_hookId, nCode, wParam, lParam);
             }
 
             MSLLHOOKSTRUCT mouseHookStruct = Marshal.PtrToStructure<MSLLHOOKSTRUCT>(lParam);
@@ -90,43 +76,7 @@ namespace WindowController
                     break;
             }
 
-            return NativeMethods.CallNextHookEx(_mouseHookId, nCode, wParam, lParam);
+            return NativeMethods.CallNextHookEx(_hookId, nCode, wParam, lParam);
         }
-
-        #region Dispose
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposedValue)
-            {
-                if (disposing)
-                {
-                    // TODO: マネージド状態を破棄します (マネージド オブジェクト)
-                }
-
-                // TODO: アンマネージド リソース (アンマネージド オブジェクト) を解放し、ファイナライザーをオーバーライドします
-                // TODO: 大きなフィールドを null に設定します
-
-                if (_mouseHookId != IntPtr.Zero)
-                {
-                    bool ret = NativeMethods.UnhookWindowsHookEx(this._mouseHookId);
-                    if (!ret)
-                    {
-                        Console.WriteLine($"UnhookWindowsHookEx: {ret}");
-                    }
-                }
-
-                disposedValue = true;
-            }
-        }
-
-        public void Dispose()
-        {
-            // このコードを変更しないでください。クリーンアップ コードを 'Dispose(bool disposing)' メソッドに記述します
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
-        }
-
-        #endregion
     }
 }

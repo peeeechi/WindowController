@@ -72,20 +72,47 @@ namespace WindowController
         /// <summary>
         /// 指定した場合、スキャンコードの前に値0xE0（224）のプレフィックスバイトがあります。
         /// </summary>
-        KEYEVENTF_EXTENDEDKEY = 0x0001,
+        KEYEVENTF_EXTENDEDKEY = 0x00000001,
         /// <summary>
         /// 指定した場合、キーは解放されます。指定しない場合、キーが押されています。
         /// </summary>
-        KEYEVENTF_KEYUP = 0x0002,
+        KEYEVENTF_KEYUP = 0x00000002,
         /// <summary>
         /// 指定した場合、wScanはキーを識別し、wVkは無視されます。
         /// </summary>
-        KEYEVENTF_SCANCODE = 0x0008,
+        KEYEVENTF_SCANCODE = 0x00000008,
         /// <summary>
         /// 指定した場合、システムはVK_PACKETキーストロークを合成します。wVkのパラメータはゼロでなければなりません。このフラグは、KEYEVENTF_KEYUPフラグとのみ組み合わせることができます。詳細については、「備考」セクションを参照してください。
         /// </summary>
-        KEYEVENTF_UNICODE = 0x0004,
+        KEYEVENTF_UNICODE = 0x00000004,
     }
+
+    [Flags]
+    public enum KBDLLHOOKSTRUCTFlags : uint
+    {
+        LLKHF_EXTENDED = 0x00000001,
+        LLKHF_INJECTED = 0x00000010,
+        LLKHF_ALTDOWN = 0x00000020,
+        LLKHF_UP = 0x00000080,
+    }
+
+    public enum KeyboardInputEventFlg: int
+    {
+        WM_ACTIVATE = 0x0006,
+        WM_APPCOMMAND = 0x0319,
+        WM_CHAR = 0x0102,
+        WM_DEADCHAR = 0x0103,
+        WM_HOTKEY = 0x0312,
+        WM_KEYDOWN = 0x0100,
+        WM_KEYUP = 0x0101,
+        WM_KILLFOCUS = 0x0008,
+        WM_SETFOCUS = 0x0007,
+        WM_SYSDEADCHAR = 0x0107,
+        WM_SYSKEYDOWN = 0x0104,
+        WM_SYSKEYUP = 0x0105,
+        WM_UNICHAR = 0x0109,
+    }
+
 
     public enum MouseMessage
     {

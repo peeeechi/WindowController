@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
@@ -8,14 +9,23 @@ namespace WindowController
 {
     public class WindowController
     {
+        public WindowController() {}
+        public WindowController(IntPtr hwnd) 
+        {
+            this._hWnd = hwnd;
+        }
         const int MAX_TEXT_LENGTH = 500;
         const UInt32 TIMEOUT_MSEC = 1000;
 
-        IntPtr _hWnd = IntPtr.Zero;
+        private IntPtr _hWnd = IntPtr.Zero;
         /// <summary>
         /// Window Handle を取得します
         /// </summary>
-        public int HWnd { get => _hWnd.ToInt32(); }
+        public IntPtr HWnd
+        { 
+            get { return _hWnd; }
+            set {_hWnd = value; }
+        }
 
         /// <summary>
         /// エラーメッセージを取得します
@@ -54,7 +64,7 @@ namespace WindowController
 
             if (retCode == 0)
             {
-                throw new Exception(GetErrorString(NativeMethods.GetLastError()));               
+                throw new Exception(GetErrorString(NativeMethods.GetLastError()));
             }
 
             return csb.ToString();
@@ -67,15 +77,13 @@ namespace WindowController
         public RECT GetRect()
         {
             RECT ret = new RECT();
-
-            if (_hWnd == IntPtr.Zero) return ret;
-
-            bool isSuccess = NativeMethods.GetWindowRect(_hWnd, ret);
+            // RECT ret;
+            // if (_hWnd == IntPtr.Zero) return ret;
+            bool isSuccess = NativeMethods.GetWindowRect(_hWnd, out ret);
             if (!isSuccess)
             {
                 throw new Exception(GetErrorString(NativeMethods.GetLastError()));
             }
-
             return ret;
         }
 
@@ -138,7 +146,6 @@ namespace WindowController
             }
             //var retcode = NativeMethods.SendMessage(_hWnd, WindowsMessage.BM_CLICK, IntPtr.Zero, IntPtr.Zero);
             var retcode = NativeMethods.SendMessageTimeout(_hWnd, WindowsMessage.BM_CLICK, IntPtr.Zero, IntPtr.Zero, flags, timeout, ref ret);
-
             if (retcode.ToInt32() == 0)
             {
                 throw new Exception(GetErrorString(NativeMethods.GetLastError()));
@@ -167,17 +174,55 @@ namespace WindowController
 
         }
 
+        public bool ToForeground()
+        {
+            if (this.HWnd == IntPtr.Zero)
+            {
+                return false;
+            }
+            else
+            {
+                return NativeMethods.SetForegroundWindow(this._hWnd);
+            }
+        }
+
+        public WindowController GetParentWindow(GaFlags flags=GaFlags.GA_PARENT)
+        {
+            var hwnd = NativeMethods.GetAncestor(this._hWnd, flags);
+
+            if (retCode == 0)
+            {
+                throw new Exception(GetErrorString(NativeMethods.GetLastError()));
+            }
+
+            if (hwnd == this._hWnd || hwnd == IntPtr.Zero)
+            {
+                return null;
+            }
+        }
+
         public WINDOWINFO GetWindowInfo()
         {
             var wi = new WINDOWINFO();
             wi.cbSize = Marshal.SizeOf(wi);  // sizeof(WINDOWINFO);でもよいようだが sizeof()を使う場合は unsafe{}が必要
-            bool ret = NativeMethods.GetWindowInfo(_hWnd, wi);
-
+            bool ret = NativeMethods.GetWindowInfo(_hWnd, ref wi);
             if (!ret)
             {
                 throw new Exception(GetErrorString(NativeMethods.GetLastError()));
             }
             return wi;
+        }
+
+        public static WindowController GetForegroundWindow()
+        {
+            var hWnd = NativeMethods.GetForegroundWindow();
+
+            return (hWnd == IntPtr.Zero)? null : new WindowController(hWnd);
+        }
+
+        public static List<WindowController> GetTopLevelWindows(string title=null)
+        {
+            
         }
     }
 
