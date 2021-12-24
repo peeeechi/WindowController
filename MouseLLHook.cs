@@ -82,7 +82,7 @@ namespace WindowController
                     // this.OnMiddleButtonDown?.Invoke(mouseHookStruct.pt);
                     break;
                 case MouseMessage.WM_MBUTTONUP:
-                    this.OnMiddleButtonDown?.Invoke(p);
+                    this.OnMiddleButtonUp?.Invoke(p);
                     // this.OnMiddleButtonDown?.Invoke(mouseHookStruct.pt);
                     break;
                 default:
