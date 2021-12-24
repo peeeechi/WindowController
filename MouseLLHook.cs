@@ -39,16 +39,25 @@ namespace WindowController
             MSLLHOOKSTRUCT mouseHookStruct = Marshal.PtrToStructure<MSLLHOOKSTRUCT>(lParam);
             MouseMessage mouseMessage = (MouseMessage)wParam;
 
+            // 解像度が変更されていた場合は正しい位置が取得できないため、
+            // GetCursorPos を使用する
+            POINT p = new POINT();
+            NativeMethods.GetCursorPos(out p);
+
             switch (mouseMessage)
             {
                 case MouseMessage.WM_LBUTTONDOWN:
-                    this.OnLeftButtonDown?.Invoke(mouseHookStruct.pt);
+                    this.OnLeftButtonDown?.Invoke(p);
+                    // this.OnLeftButtonDown?.Invoke(mouseHookStruct.pt);
                     break;
                 case MouseMessage.WM_LBUTTONUP:
-                    this.OnLeftButtonUp?.Invoke(mouseHookStruct.pt);
+                    this.OnLeftButtonUp?.Invoke(p);
+                    // this.OnLeftButtonUp?.Invoke(mouseHookStruct.pt);
                     break;
                 case MouseMessage.WM_MOUSEMOVE:
-                    this.OnMouseMove?.Invoke(mouseHookStruct.pt);
+                   
+                    this.OnMouseMove?.Invoke(p);
+                    // this.OnMouseMove?.Invoke(mouseHookStruct.pt);
                     break;
                 case MouseMessage.WM_MOUSEWHEEL:
                     // 例
@@ -61,16 +70,20 @@ namespace WindowController
 
                     break;
                 case MouseMessage.WM_RBUTTONDOWN:
-                    this.OnRightButtonDown?.Invoke(mouseHookStruct.pt);
+                    this.OnRightButtonDown?.Invoke(p);
+                    // this.OnRightButtonDown?.Invoke(mouseHookStruct.pt);
                     break;
                 case MouseMessage.WM_RBUTTONUP:
-                    this.OnRightButtonUp?.Invoke(mouseHookStruct.pt);
+                    this.OnRightButtonUp?.Invoke(p);
+                    // this.OnRightButtonUp?.Invoke(mouseHookStruct.pt);
                     break;
                 case MouseMessage.WM_MBUTTONDOWN:
-                    this.OnMiddleButtonDown?.Invoke(mouseHookStruct.pt);
+                    this.OnMiddleButtonDown?.Invoke(p);
+                    // this.OnMiddleButtonDown?.Invoke(mouseHookStruct.pt);
                     break;
                 case MouseMessage.WM_MBUTTONUP:
-                    this.OnMiddleButtonDown?.Invoke(mouseHookStruct.pt);
+                    this.OnMiddleButtonDown?.Invoke(p);
+                    // this.OnMiddleButtonDown?.Invoke(mouseHookStruct.pt);
                     break;
                 default:
                     break;

@@ -190,15 +190,12 @@ namespace WindowController
         {
             var hwnd = NativeMethods.GetAncestor(this._hWnd, flags);
 
-            if (retCode == 0)
-            {
-                throw new Exception(GetErrorString(NativeMethods.GetLastError()));
-            }
-
-            if (hwnd == this._hWnd || hwnd == IntPtr.Zero)
+            if (hwnd == _hWnd || hwnd == IntPtr.Zero)
             {
                 return null;
             }
+
+            return new WindowController(hwnd);
         }
 
         public WINDOWINFO GetWindowInfo()
@@ -220,10 +217,23 @@ namespace WindowController
             return (hWnd == IntPtr.Zero)? null : new WindowController(hWnd);
         }
 
-        public static List<WindowController> GetTopLevelWindows(string title=null)
+        public static WindowController FindWindow(string title, string className=null)
         {
-            
+            var hWnd = NativeMethods.FindWindow(className, title);
+            return (hWnd == IntPtr.Zero)? null : new WindowController(hWnd);
         }
+
+        public static WindowController GetWindowFromPoint(POINT p)
+        {
+            var hWnd = NativeMethods.WindowFromPoint(p);
+
+            return (hWnd == IntPtr.Zero)? null : new WindowController(hWnd);
+        }
+
+        // public static List<WindowController> GetTopLevelWindows(string title=null)
+        // {
+            
+        // }
     }
 
 }

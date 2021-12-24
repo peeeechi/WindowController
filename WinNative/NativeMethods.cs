@@ -22,6 +22,9 @@ namespace WindowController
         [DllImport("kernel32", CharSet = CharSet.Auto, SetLastError = true, ExactSpelling = false)]
         public static extern IntPtr GetProcAddress(IntPtr hModule, string lpProcName);
 
+        // ウィンドウの表示状態を調べる(WS_VISIBLEスタイルを持つかを調べる)
+        [DllImport("user32.dll")]
+        public static extern bool IsWindowVisible(IntPtr hWnd);
 
         /// <summary>
         /// 画面座標でのマウスカーソルの位置を取得します
