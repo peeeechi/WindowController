@@ -60,6 +60,30 @@ namespace WindowController
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         public static extern IntPtr WindowFromPoint([In] POINT point);
 
+
+        /// <summary>
+        /// 親ウィンドウに属する子ウィンドウのどれに指定されたポイントが含まれているかを判別します<br/>検索は、直接の子ウィンドウに制限されます<br/>孫、およびより深い子孫ウィンドウは検索されません<br/>特定の子ウィンドウをスキップするには、ChildWindowFromPointEx関数を使用します<br/>
+        /// https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-childwindowfrompoint
+        /// </summary>
+        /// <param name="IntPtr">親ウィンドウへのハンドル</param>
+        /// <param name="point">チェックするポイントのhWndParentを基準としたクライアント座標を定義する構造</param>
+        /// <returns>戻り値は、子ウィンドウが非表示または無効になっている場合でも、ポイントを含む子ウィンドウへのハンドルです<br/>ポイントが親ウィンドウの外側にある場合、戻り値はNULLです<br/>ポイントが親ウィンドウ内にあるが子ウィンドウ内にはない場合、戻り値は親ウィンドウへのハンドルです</returns>
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        public static extern IntPtr ChildWindowFromPoint([In] IntPtr IntPtr, [In] POINT point);
+
+
+        /// <summary>
+        /// ScreenToClientの機能は、クライアント領域の座標に画面上の指定点の画面座標に変換します
+        /// https://docs.microsoft.com/ja-jp/windows/win32/api/winuser/nf-winuser-screentoclient
+        /// </summary>
+        /// <param name="IntPtr">クライアント領域が変換に使用されるウィンドウへのハンドル</param>
+        /// <param name="point">変換する画面座標を指定するPOINT構造体へのポインター</param>
+        /// <returns>関数が成功した場合、戻り値はtrueです<br/>関数が失敗した場合、戻り値はfalseです<br/></returns>
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool ScreenToClient([In] IntPtr IntPtr, [In, Out] ref POINT point);
+
+
         /// <summary>
         /// クラス名とウィンドウ名が指定された文字列と一致するウィンドウへのハンドルを取得します<br/>この関数は、指定された子ウィンドウの次のウィンドウから始めて、子ウィンドウを検索します<br/>この関数は、大文字と小文字を区別する検索を実行しません<br/>
         /// </summary>

@@ -4,12 +4,12 @@ using System.Runtime.InteropServices;
 
 namespace WindowController
 {
-    public class MouseLLHook: Hook
+    public class MouseLLHook : Hook
     {
         public delegate void MouseButtonActionHandler(POINT p);
         public delegate void MouseWheelSpinHandler(int wheelAmount);
 
-        public MouseLLHook(UInt32 threadId=0): base(HookType.WH_MOUSE_LL, threadId){}
+        public MouseLLHook(UInt32 threadId = 0) : base(HookType.WH_MOUSE_LL, threadId) { }
 
         ~MouseLLHook()
         {
@@ -36,7 +36,7 @@ namespace WindowController
                 return NativeMethods.CallNextHookEx(_hookId, nCode, wParam, lParam);
             }
 
-            MSLLHOOKSTRUCT mouseHookStruct = Marshal.PtrToStructure<MSLLHOOKSTRUCT>(lParam);
+            MSLLHOOKSTRUCT mouseHookStruct = (MSLLHOOKSTRUCT)Marshal.PtrToStructure(lParam, typeof(MSLLHOOKSTRUCT));
             MouseMessage mouseMessage = (MouseMessage)wParam;
 
             // 解像度が変更されていた場合は正しい位置が取得できないため、
@@ -55,7 +55,7 @@ namespace WindowController
                     // this.OnLeftButtonUp?.Invoke(mouseHookStruct.pt);
                     break;
                 case MouseMessage.WM_MOUSEMOVE:
-                   
+
                     this.OnMouseMove?.Invoke(p);
                     // this.OnMouseMove?.Invoke(mouseHookStruct.pt);
                     break;

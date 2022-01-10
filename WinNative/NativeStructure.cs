@@ -53,21 +53,37 @@ namespace WindowController
         /// <summary>
         /// 矩形の幅を取得します
         /// </summary>
-        public Int32 width { get => right - left; }
+        public Int32 width
+        {
+            get
+            {
+                return right - left;
+            }
+        }
+
         /// <summary>
         /// 矩形の高さを取得します
         /// </summary>
-        public Int32 height { get => bottom - top; }
+        public Int32 height
+        {
+            get
+            {
+                return bottom - top;
+            }
+        }
         /// <summary>
         /// 矩形の中心点を取得します
         /// </summary>
-        public POINT center 
+        public POINT center
         {
-            get => new POINT
+            get
             {
-                x = left + (width / 2),
-                y = top + (height / 2)
-            };
+                return new POINT
+                {
+                    x = left + (width / 2),
+                    y = top + (height / 2)
+                };
+            }
         }
     }
 
@@ -373,15 +389,18 @@ namespace WindowController
         /// <summary>
         /// シミュレートされたマウスイベントに関する情報
         /// </summary>
-        [FieldOffset(0)] public MOUSEINPUT mi;
+        [FieldOffset(0)]
+        public MOUSEINPUT mi;
         /// <summary>
         /// シミュレートされたキーボードイベントに関する情報
         /// </summary>
-        [FieldOffset(0)] public KEYBDINPUT ki;
+        [FieldOffset(0)]
+        public KEYBDINPUT ki;
         /// <summary>
         /// シミュレートされたハードウェアイベントに関する情報
         /// </summary>
-        [FieldOffset(0)] public HARDWAREINPUT hi;
+        [FieldOffset(0)]
+        public HARDWAREINPUT hi;
     };
 
 }

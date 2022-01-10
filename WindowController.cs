@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
+
 namespace WindowController
 {
     public class WindowController
@@ -98,6 +99,13 @@ namespace WindowController
         {
             if (this._hWnd == IntPtr.Zero) return string.Empty;
 
+            //var element = AutomationElement.FromHandle(this._hWnd);
+
+            //var p = (ValuePattern)element.GetCurrentPattern(ValuePattern.Pattern);
+
+            //return p.Current.Value;
+
+
             var ret = new IntPtr(0);
             int text_length = 0;
             var is_success = (int)NativeMethods.SendMessageTimeout(_hWnd, WindowsMessage.WM_GETTEXTLENGTH, IntPtr.Zero, IntPtr.Zero, flags, timeout, ref ret);
@@ -120,6 +128,8 @@ namespace WindowController
             }
 
             return tsb.ToString();
+
+
         }
 
         /// <summary>
@@ -227,7 +237,14 @@ namespace WindowController
         {
             var hWnd = NativeMethods.WindowFromPoint(p);
 
-            return (hWnd == IntPtr.Zero)? null : new WindowController(hWnd);
+            if (hWnd == IntPtr.Zero) 
+                return null;
+
+            var ret = NativeMethods.ScreenToClient(hWnd, ref p);
+
+            hWnd = NativeMethods.ChildWindowFromPoint(hWnd, p);
+
+            return (hWnd == IntPtr.Zero) ? null : new WindowController(hWnd);
         }
 
         // public static List<WindowController> GetTopLevelWindows(string title=null)
@@ -235,5 +252,4 @@ namespace WindowController
             
         // }
     }
-
 }
