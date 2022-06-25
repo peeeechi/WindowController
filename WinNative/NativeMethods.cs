@@ -27,6 +27,16 @@ namespace WindowController
         public static extern bool IsWindowVisible(IntPtr hWnd);
 
         /// <summary>
+        /// 指定されたウィンドウハンドルが既存のウィンドウを識別するかどうかを決定します
+        /// </summary>
+        /// <param name="hWnd"></param>
+        /// <returns>ウィンドウハンドルが既存のウィンドウを識別する場合、戻り値はゼロ以外です<br/>
+        ///  ウィンドウハンドルが既存のウィンドウを識別しない場合、戻り値はゼロです
+        /// </returns>
+        [DllImport("user32.dll")]
+        public static extern bool IsWindow(IntPtr hWnd);
+
+        /// <summary>
         /// 画面座標でのマウスカーソルの位置を取得します
         /// </summary>
         /// <param name="lpPoint">カーソルの画面座標を受け取るPOINT構造体へのポインター</param>
@@ -60,7 +70,6 @@ namespace WindowController
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         public static extern IntPtr WindowFromPoint([In] POINT point);
 
-
         /// <summary>
         /// 親ウィンドウに属する子ウィンドウのどれに指定されたポイントが含まれているかを判別します<br/>検索は、直接の子ウィンドウに制限されます<br/>孫、およびより深い子孫ウィンドウは検索されません<br/>特定の子ウィンドウをスキップするには、ChildWindowFromPointEx関数を使用します<br/>
         /// https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-childwindowfrompoint
@@ -70,7 +79,6 @@ namespace WindowController
         /// <returns>戻り値は、子ウィンドウが非表示または無効になっている場合でも、ポイントを含む子ウィンドウへのハンドルです<br/>ポイントが親ウィンドウの外側にある場合、戻り値はNULLです<br/>ポイントが親ウィンドウ内にあるが子ウィンドウ内にはない場合、戻り値は親ウィンドウへのハンドルです</returns>
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         public static extern IntPtr ChildWindowFromPoint([In] IntPtr IntPtr, [In] POINT point);
-
 
         /// <summary>
         /// ScreenToClientの機能は、クライアント領域の座標に画面上の指定点の画面座標に変換します
@@ -82,7 +90,6 @@ namespace WindowController
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool ScreenToClient([In] IntPtr IntPtr, [In, Out] ref POINT point);
-
 
         /// <summary>
         /// クラス名とウィンドウ名が指定された文字列と一致するウィンドウへのハンドルを取得します<br/>この関数は、指定された子ウィンドウの次のウィンドウから始めて、子ウィンドウを検索します<br/>この関数は、大文字と小文字を区別する検索を実行しません<br/>
@@ -206,7 +213,6 @@ namespace WindowController
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool SetForegroundWindow([In] IntPtr hwnd);
 
-
         /// <summary>
         /// 指定されたメッセージを1つ以上のウィンドウに送信します<br/>
         /// https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-sendmessagetimeouta
@@ -259,6 +265,17 @@ namespace WindowController
         /// <returns>戻り値は、メッセージ処理の結果を指定します<br/>送信されるメッセージによって異なります</returns>
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
         public extern static IntPtr SendMessage([In] IntPtr hWnd, [In] WindowsMessage Msg, [In] IntPtr wParam, [In, Out] StringBuilder lParam);
+
+        /// <summary>
+        /// 指定されたメッセージを1つまたは複数のウィンドウに送信します<br/>ウィンドウが呼び出し元のスレッドによって作成された場合、SendNotifyMessageはウィンドウのウィンドウプロシージャを呼び出し、ウィンドウプロシージャがメッセージを処理するまで戻りません<br/>ウィンドウが別のスレッドによって作成された場合、SendNotifyMessageはメッセージをウィンドウプロシージャに渡し、すぐに戻ります<br/>ウィンドウプロシージャがメッセージの処理を終了するのを待ちません<br/>
+        /// </summary>
+        /// <param name="hWnd">ウィンドウプロシージャがメッセージを受信するウィンドウへのハンドル<br/>このパラメータがHWND_BROADCAST（（HWND）0xffff）の場合、メッセージは、無効または非表示の所有されていないウィンドウ、オーバーラップしたウィンドウ、ポップアップウィンドウなど、システム内のすべてのトップレベルウィンドウに送信されます<br/>ただし、メッセージは子ウィンドウには送信されません<br/></param>
+        /// <param name="Msg">送信するメッセージ<br/>システム提供メッセージのリストについては、「システム定義メッセージ」を参照してください<br/></param>
+        /// <param name="wParam">追加のメッセージ固有の情報</param>
+        /// <param name="lParam">追加のメッセージ固有の情報</param>
+        /// <returns>関数が成功した場合、戻り値はゼロ以外です<br/>関数が失敗した場合、戻り値はゼロです<br/>拡張エラー情報を取得するには、GetLastErrorを呼び出します</returns>
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        public extern static IntPtr SendNotifyMessage([In] IntPtr hWnd, [In] WindowsMessage Msg, [In] IntPtr wParam, [In] IntPtr lParam);
 
         /// <summary>
         /// 呼び出し元のスレッドの最後のエラーコード値を取得します<br/>最後のエラーコードはスレッドごとに維持されます<br/>複数のスレッドが互いの最後のエラーコードを上書きすることはありません<br/>

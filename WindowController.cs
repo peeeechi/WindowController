@@ -4,6 +4,7 @@ using System.Text;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using static System.Threading.Thread;
 
 
 namespace WindowController
@@ -41,12 +42,12 @@ namespace WindowController
 
             if (errorMessageLength != 0)
             {
-                return $"{targetFile} line:{lineNumber} method: {methodName}--- ${st.ToString()}";
+                return $"{targetFile} line:{lineNumber} method: {methodName}{Environment.NewLine}{st.ToString()}";
             }
             else
             {
                 uint errorCode_message = NativeMethods.GetLastError();
-                return $"{targetFile} line:{lineNumber} method: {methodName}--- ${st.ToString()}\r\n\tFormatMessage: ${errorCode_message,16}";
+                return $"{targetFile} line:{lineNumber} method: {methodName}{Environment.NewLine}{st.ToString()}\r\n\tFormatMessage: {errorCode_message,16}";
             }
         }
 
@@ -95,7 +96,7 @@ namespace WindowController
         /// <param name="timeout"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        public string GetWindowText(SendMessageTimeoutFlgs flags = SendMessageTimeoutFlgs.SMTO_NORMAL, UInt32 timeout = TIMEOUT_MSEC)
+        public string GetWindowText(SendMessageTimeoutFlgs flags = SendMessageTimeoutFlgs.SMTO_BLOCK, UInt32 timeout = TIMEOUT_MSEC)
         {
             if (this._hWnd == IntPtr.Zero) return string.Empty;
 
@@ -110,9 +111,12 @@ namespace WindowController
             int text_length = 0;
             var is_success = (int)NativeMethods.SendMessageTimeout(_hWnd, WindowsMessage.WM_GETTEXTLENGTH, IntPtr.Zero, IntPtr.Zero, flags, timeout, ref ret);
 
+            //Debug.WriteLine($"ret: {ret}, return: {is_success}");
+
             if (is_success == 0)
             {
-                throw new Exception(GetErrorString(NativeMethods.GetLastError()));
+                //throw new Exception(GetErrorString(NativeMethods.GetLastError()));
+                return null;
             }
             else
             {
@@ -137,29 +141,26 @@ namespace WindowController
         /// </summary>
         /// <param name="flags"></param>
         /// <param name="timeout"></param>
-        public void SendClickMessage(SendMessageTimeoutFlgs flags = SendMessageTimeoutFlgs.SMTO_NORMAL, UInt32 timeout = TIMEOUT_MSEC)
+        public void SendClickMessage()
         {
-            // ボタン操作するウィンドウをアクティブにする
-            var parenthWnd = NativeMethods.GetAncestor(this._hWnd, GaFlags.GA_ROOT);
             IntPtr ret = IntPtr.Zero;
-            if (parenthWnd == IntPtr.Zero)
-            {
-                ret = NativeMethods.SetActiveWindow(this._hWnd);
-            }
-            else
-            {
-                ret = NativeMethods.SetActiveWindow(parenthWnd);
-            }
-            if (ret == IntPtr.Zero)
-            {
-                throw new Exception(GetErrorString(NativeMethods.GetLastError()));
-            }
-            //var retcode = NativeMethods.SendMessage(_hWnd, WindowsMessage.BM_CLICK, IntPtr.Zero, IntPtr.Zero);
-            var retcode = NativeMethods.SendMessageTimeout(_hWnd, WindowsMessage.BM_CLICK, IntPtr.Zero, IntPtr.Zero, flags, timeout, ref ret);
+            var retcode = NativeMethods.SendNotifyMessage(_hWnd, WindowsMessage.BM_CLICK, IntPtr.Zero, IntPtr.Zero);
+
             if (retcode.ToInt32() == 0)
             {
                 throw new Exception(GetErrorString(NativeMethods.GetLastError()));
             }
+        }
+
+        public void ClickEmulate(int? waitTimeMs = null)
+        {
+            var rect = this.GetRect();
+
+            if (waitTimeMs.HasValue)
+            {
+                Sleep(waitTimeMs.Value);
+            }
+            MouseEmulator.MoveAndClick(rect.center.x, rect.center.y);
         }
 
         /// <summary>
@@ -194,6 +195,15 @@ namespace WindowController
             {
                 return NativeMethods.SetForegroundWindow(this._hWnd);
             }
+        }
+
+        /// <summary>
+        /// 自身のWindowHandleをもつWindowが存在する(=有効な場合)場合はtrue
+        /// </summary>
+        /// <returns></returns>
+        public bool Exist()
+        {
+            return this._hWnd == IntPtr.Zero ? false : NativeMethods.IsWindow(this.HWnd);
         }
 
         public WindowController GetParentWindow(GaFlags flags=GaFlags.GA_PARENT)
