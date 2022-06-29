@@ -197,6 +197,34 @@ namespace WindowController
             }
         }
 
+        public string GetProcessName()
+        {
+            if (this.HWnd == IntPtr.Zero) return null;
+            
+            int threadId = NativeMethods.GetWindowThreadProcessId(this.HWnd, out UIntPtr pid);
+
+            if (pid == UIntPtr.Zero) return null;
+
+            // using (var process = Process.GetProcessById((int)pid.ToUInt32()))
+            // {
+            //     return process.ProcessName;                
+            // }
+
+            var hnd = NativeMethods.OpenProcess((ProcessAccessRights.PROCESS_QUERY_INFORMATION|ProcessAccessRights.PROCESS_VM_READ), false, pid.ToUInt32());
+
+            try
+            {
+                var buffer = new StringBuilder(255);
+                uint ret = NativeMethods.GetModuleBaseName(hnd, IntPtr.Zero, buffer, (uint)buffer.Capacity);
+                return buffer.ToString();
+                // return buffer.ToString().ToLower();
+            }
+            finally
+            {
+                NativeMethods.CloseHandle(hnd);
+            }
+        }
+
         /// <summary>
         /// 自身のWindowHandleをもつWindowが存在する(=有効な場合)場合はtrue
         /// </summary>
@@ -256,10 +284,5 @@ namespace WindowController
 
             return (hWnd == IntPtr.Zero) ? null : new WindowController(hWnd);
         }
-
-        // public static List<WindowController> GetTopLevelWindows(string title=null)
-        // {
-            
-        // }
     }
 }

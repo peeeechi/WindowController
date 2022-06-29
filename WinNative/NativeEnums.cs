@@ -7,6 +7,89 @@ using System.Threading.Tasks;
 namespace WindowController
 {
     /// <summary>
+    /// プロセスのセキュリティとアクセス権<br/>
+    /// https://docs.microsoft.com/ja-jp/windows/win32/procthread/process-security-and-access-rights
+    /// </summary>
+    [Flags]
+    public enum ProcessAccessRights: uint
+    {
+        /// <summary>
+        /// このプロセスを PROC_THREAD_ATTRIBUTE_PARENT_PROCESSの親プロセスとして使用するために必要です<br/>
+        /// </summary>
+        PROCESS_CREATE_PROCESS = 0x0080,
+        /// <summary>
+        /// プロセスでスレッドを作成するために必要です<br/>
+        /// </summary>
+        PROCESS_CREATE_THREAD = 0x0002,
+        /// <summary>
+        /// DuplicateHandle を使用してハンドルを複製するために必要です<br/>
+        /// </summary>
+        PROCESS_DUP_HANDLE = 0x0040,
+        /// <summary>
+        /// トークン、終了コード、優先度クラスなど、プロセスに関する特定の情報を取得するために必要です ( OpenProcessToken を参照)<br/>
+        /// </summary>
+        PROCESS_QUERY_INFORMATION = 0x0400,
+        /// <summary>
+        /// プロセスに関する特定の情報を取得するために必要です ( GetExitCodeProcess、 GetPriorityClass、 IsProcessInJob、 QueryFullProcessImageName を参照)<br/> PROCESS_QUERY_INFORMATIONアクセス権を持つハンドルには、PROCESS_QUERY_LIMITED_INFORMATIONが自動的に付与されます<br/>Windows Server 2003 および Windows XP: このアクセス権はサポートされていません<br/>
+        /// </summary>
+        PROCESS_QUERY_LIMITED_INFORMATION = 0x1000,
+        /// <summary>
+        /// 優先順位クラスなど、プロセスに関する特定の情報を設定するために必要です ( SetPriorityClass を参照)<br/>
+        /// </summary>
+        PROCESS_SET_INFORMATION = 0x0200,
+        /// <summary>
+        /// SetProcessWorkingSetSize を使用してメモリ制限を設定するために必要です<br/>
+        /// </summary>
+        PROCESS_SET_QUOTA = 0x0100,
+        /// <summary>
+        /// プロセスを中断または再開するために必要です<br/>
+        /// </summary>
+        PROCESS_SUSPEND_RESUME = 0x0800,
+        /// <summary>
+        /// TerminateProcess を使用してプロセスを終了するために必要です<br/>
+        /// </summary>
+        PROCESS_TERMINATE = 0x0001,
+        /// <summary>
+        /// プロセスのアドレス空間に対して操作を実行するために必要です ( VirtualProtectEx と WriteProcessMemory を参照)<br/>
+        /// </summary>
+        PROCESS_VM_OPERATION = 0x0008,
+        /// <summary>
+        /// ReadProcessMemory を使用してプロセス内のメモリを読み取るために必要です<br/>
+        /// </summary>
+        PROCESS_VM_READ = 0x0010,
+        /// <summary>
+        /// WriteProcessMemory を使用してプロセス内のメモリに 書き込むには必要です<br/>
+        /// </summary>
+        PROCESS_VM_WRITE = 0x0020,
+
+        // /// <summary>
+        // /// オブジェクトを削除するために必要です<br/>
+        // /// </summary>
+        // DELETE = 0x00010000L,
+        // /// <summary>
+        // /// SACL に情報を含めず、オブジェクトのセキュリティ記述子の情報を読み取るために必要です<br/> SACL の読み取りまたは書き込みを行うには、 ACCESS_SYSTEM_SECURITY アクセス権を要求する必要があります<br/> 詳細については、「 SACL アクセス権」を参照してください<br/>
+        // /// </summary>
+        // READ_CONTROL = 0x00020000L,
+        // /// <summary>
+        // /// 同期にオブジェクトを使用する権限<br/> これにより、スレッドはオブジェクトがシグナル状態になるまで待機できます<br/>
+        // /// </summary>
+        // SYNCHRONIZE = 0x00100000L,
+        // /// <summary>
+        // /// オブジェクトのセキュリティ記述子で DACL を変更するために必要です<br/>
+        // /// </summary>
+        // WRITE_DAC = 0x00040000L,
+        // /// <summary>
+        // /// オブジェクトのセキュリティ記述子の所有者を変更するために必要です<br/>
+        // /// </summary>
+        // WRITE_OWNER = 0x00080000L,
+        // STANDARD_RIGHTS_REQUIRED = 0x000F0000L,
+        // /// <summary>
+        // /// プロセス オブジェクトに対して可能なすべてのアクセス権<br/>Windows Server 2003 および Windows XP:Windows Server 2008 および Windows Vista でPROCESS_ALL_ACCESS フラグのサイズが増加しました<br/> Windows Server 2008 および Windows Vista 用にコンパイルされたアプリケーションが Windows Server 2003 または Windows XP で実行されている場合、PROCESS_ALL_ACCESS フラグが大きすぎて、このフラグを指定する関数はERROR_ACCESS_DENIEDで失敗します<br/> この問題を回避するには、操作に必要なアクセス権の最小セットを指定します<br/> PROCESS_ALL_ACCESS使用する必要がある場合は、_WIN32_WINNTアプリケーションの対象となる最小オペレーティング システム (たとえば) #define _WIN32_WINNT _WIN32_WINNT_WINXPに設定します<br/> 詳細については、「Windows ヘッダーの使用」を参照してください<br/>
+        // /// </summary>
+        // PROCESS_ALL_ACCESS = STANDARD_RIGHTS_REQUIRED | SYNCHRONIZE | 0xFFFF,
+    }
+
+    /// <summary>
     /// マウスの動きとボタンのクリックのさまざまな側面を制御します<br/>このパラメーターは、次の値の特定の組み合わせにすることができます<br/>
     /// https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-mouse_event
     /// </summary>

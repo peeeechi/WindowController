@@ -123,6 +123,23 @@ namespace WindowController
         public static extern IntPtr GetForegroundWindow();
 
         /// <summary>
+        /// 既存のローカルプロセスオブジェクトを開きます
+        /// </summary>
+        /// <see cref="https://docs.microsoft.com/ja-jp/windows/win32/api/processthreadsapi/nf-processthreadsapi-openprocess"/>
+        /// <param name="dwDesiredAccess">プロセスオブジェクトへのアクセス<br/>このアクセス権は、プロセスのセキュリティ記述子に対してチェックされます<br/>このパラメーターは、1つ以上の プロセスアクセス権にすることができます<br/>呼び出し元がSeDebugPrivilege特権を有効にしている場合、セキュリティ記述子の内容に関係なく、要求されたアクセスが許可されます<br/></param>
+        /// <param name="bInheritHandle">この値がTRUEの場合、このプロセスによって作成されたプロセスはハンドルを継承します<br/>それ以外の場合、プロセスはこのハンドルを継承しません<br/></param>
+        /// <param name="dwProcessId">開くローカルプロセスの識別子<br/>指定されたプロセスがシステムアイドルプロセス（0x00000000）の場合、関数は失敗し、最後のエラーコードはERROR_INVALID_PARAMETERです<br/>指定されたプロセスがシステムプロセスまたはクライアントサーバーランタイムサブシステム（CSRSS）プロセスのいずれかである場合、この関数は失敗し、最後のエラーコードはERROR_ACCESS_DENIED、アクセス制限によりユーザーレベルのコードがそれらを開くことができないためです<br/>この関数の引数としてGetCurrentProcessIdを使用している場合は、パフォーマンスを向上させるために、OpenProcessの代わりにGetCurrentProcessを使用することを検討してください<br/></param>
+        /// <returns>関数が成功した場合、戻り値は指定されたプロセスへのオープンハンドルです<br/>関数が失敗した場合、戻り値はNULLです<br/>拡張エラー情報を取得するには、 GetLastErrorを呼び出します</returns>
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError =true)]
+        public static extern IntPtr OpenProcess(ProcessAccessRights dwDesiredAccess, bool bInheritHandle, uint dwProcessId);
+
+        [DllImport("kernel32.dll")]
+        public static extern bool CloseHandle(IntPtr handle);
+
+        [DllImport("psapi.dll", CharSet = CharSet.Ansi)]
+        public static extern uint GetModuleBaseName(IntPtr hWnd, IntPtr hModule, [MarshalAs(UnmanagedType.LPStr), Out] StringBuilder lpBaseName, uint nSize);
+
+        /// <summary>
         /// 各ウィンドウへのハンドルをアプリケーション定義のコールバック関数に渡すことにより、画面上のすべてのトップレベルウィンドウを列挙します<br/> EnumWindowsは、最後の最上位ウィンドウが列挙されるか、コールバック関数がFALSEを返すまで続きます<br/>
         /// </summary>
         /// <see cref="https://docs.microsoft.com/ja-jp/windows/win32/api/winuser/nf-winuser-enumwindows"/>
@@ -194,7 +211,7 @@ namespace WindowController
         /// <param name="lpdwProcessId">プロセス識別子を受け取る変数へのポインタ<br/>このパラメーターがNULLでない場合、GetWindowThreadProcessIdはプロセスの識別子を変数にコピーします<br/>それ以外の場合は、そうではありません</param>
         /// <returns>戻り値は、ウィンドウを作成したスレッドの識別子です</returns>
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        public static extern int GetWindowThreadProcessId([In] IntPtr hWnd, [Out] out int lpdwProcessId);
+        public static extern int GetWindowThreadProcessId([In] IntPtr hWnd, [Out] out UIntPtr lpdwProcessId);
 
         /// <summary>
         /// 指定されたウィンドウに関する情報を取得します<br/>
