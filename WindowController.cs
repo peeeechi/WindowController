@@ -115,8 +115,8 @@ namespace WindowController
 
             if (is_success == 0)
             {
-                //throw new Exception(GetErrorString(NativeMethods.GetLastError()));
-                return null;
+                throw new Exception(GetErrorString(NativeMethods.GetLastError()));
+                // return null;
             }
             else
             {
@@ -211,11 +211,20 @@ namespace WindowController
             // }
 
             var hnd = NativeMethods.OpenProcess((ProcessAccessRights.PROCESS_QUERY_INFORMATION|ProcessAccessRights.PROCESS_VM_READ), false, pid.ToUInt32());
+            if (hnd == IntPtr.Zero)
+            {
+                throw new Exception(GetErrorString(NativeMethods.GetLastError()));
+            }
 
             try
             {
                 var buffer = new StringBuilder(255);
                 uint ret = NativeMethods.GetModuleBaseName(hnd, IntPtr.Zero, buffer, (uint)buffer.Capacity);
+                if (ret == 0)
+                {
+                    throw new Exception(GetErrorString(NativeMethods.GetLastError()));
+                }
+
                 return buffer.ToString();
                 // return buffer.ToString().ToLower();
             }

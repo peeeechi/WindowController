@@ -133,10 +133,20 @@ namespace WindowController
         [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError =true)]
         public static extern IntPtr OpenProcess(ProcessAccessRights dwDesiredAccess, bool bInheritHandle, uint dwProcessId);
 
-        [DllImport("kernel32.dll")]
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError =true)]
         public static extern bool CloseHandle(IntPtr handle);
 
-        [DllImport("psapi.dll", CharSet = CharSet.Ansi)]
+
+        /// <summary>
+        /// 指定されたモジュールのベース名を取得します
+        /// https://docs.microsoft.com/ja-jp/windows/win32/api/psapi/nf-psapi-getmodulebasenamea
+        /// </summary>
+        /// <param name="hWnd"></param>
+        /// <param name="hModule"></param>
+        /// <param name="lpBaseName"></param>
+        /// <param name="nSize"></param>
+        /// <returns>関数が成功した場合、戻り値は、バッファーにコピーされた文字列の長さを文字数で指定します<br/>関数が失敗した場合、戻り値はゼロです<br/>拡張エラー情報を取得するには、 GetLastErrorを呼び出します<br/></returns>
+        [DllImport("psapi.dll", CharSet = CharSet.Ansi, SetLastError =true)]
         public static extern uint GetModuleBaseName(IntPtr hWnd, IntPtr hModule, [MarshalAs(UnmanagedType.LPStr), Out] StringBuilder lpBaseName, uint nSize);
 
         /// <summary>
