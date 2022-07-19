@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 
 namespace WindowController
@@ -24,6 +21,7 @@ namespace WindowController
 
         // ウィンドウの表示状態を調べる(WS_VISIBLEスタイルを持つかを調べる)
         [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool IsWindowVisible(IntPtr hWnd);
 
         /// <summary>
@@ -34,6 +32,7 @@ namespace WindowController
         ///  ウィンドウハンドルが既存のウィンドウを識別しない場合、戻り値はゼロです
         /// </returns>
         [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool IsWindow(IntPtr hWnd);
 
         /// <summary>
