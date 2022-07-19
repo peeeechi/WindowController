@@ -35,20 +35,22 @@ namespace WindowController
         /// <param name="errorCode"></param>
         /// <param name="methodName"></param>
         /// <returns></returns>
-        private string GetErrorString(uint errorCode, [CallerMemberName] string methodName = "", [CallerLineNumber] int lineNumber = 0, [CallerFilePath] string targetFile = "")
+        private WinApiException GetError(uint errorCode, [CallerMemberName] string methodName = "", [CallerLineNumber] int lineNumber = 0, [CallerFilePath] string targetFile = "")
         {
             StringBuilder st = new StringBuilder(500);
             uint errorMessageLength = NativeMethods.FormatMessage(FormatMessageFlgs.FORMAT_MESSAGE_FROM_SYSTEM, IntPtr.Zero, errorCode, 0, st, (uint)st.Capacity, null);
-
+            string message = "";
             if (errorMessageLength != 0)
             {
-                return $"{targetFile} line:{lineNumber} method: {methodName}{Environment.NewLine}{st.ToString()}";
+                message = $"{targetFile} line:{lineNumber} method: {methodName}{Environment.NewLine}{st.ToString()}";
+                return new WinApiException(errorCode, message);
             }
             else
             {
-                uint errorCode_message = NativeMethods.GetLastError();
-                return $"{targetFile} line:{lineNumber} method: {methodName}{Environment.NewLine}{st.ToString()}\r\n\tFormatMessage: {errorCode_message,16}";
-            }
+                uint errorCode_ = NativeMethods.GetLastError();
+                message = $"{targetFile} line:{lineNumber} method: {methodName}{Environment.NewLine}{st.ToString()}\r\n\tFormatMessage: {errorCode_,16}";
+                return new WinApiException(errorCode, message);
+            } 
         }
 
         /// <summary>
@@ -66,7 +68,7 @@ namespace WindowController
 
             if (retCode == 0)
             {
-                throw new Exception(GetErrorString(NativeMethods.GetLastError()));
+                throw GetError(NativeMethods.GetLastError());
             }
 
             return csb.ToString();
@@ -84,7 +86,7 @@ namespace WindowController
             bool isSuccess = NativeMethods.GetWindowRect(_hWnd, out ret);
             if (!isSuccess)
             {
-                throw new Exception(GetErrorString(NativeMethods.GetLastError()));
+                throw GetError(NativeMethods.GetLastError());
             }
             return ret;
         }
@@ -115,7 +117,7 @@ namespace WindowController
 
             if (is_success == 0)
             {
-                throw new Exception(GetErrorString(NativeMethods.GetLastError()));
+                throw GetError(NativeMethods.GetLastError());
                 // return null;
             }
             else
@@ -128,7 +130,7 @@ namespace WindowController
 
             if (is_success == 0)
             {
-                throw new Exception(GetErrorString(NativeMethods.GetLastError()));
+                throw GetError(NativeMethods.GetLastError());
             }
 
             return tsb.ToString();
@@ -148,7 +150,7 @@ namespace WindowController
 
             if (retcode.ToInt32() == 0)
             {
-                throw new Exception(GetErrorString(NativeMethods.GetLastError()));
+                throw GetError(NativeMethods.GetLastError());
             }
         }
 
@@ -180,7 +182,7 @@ namespace WindowController
 
             if (retCode.ToInt32() == 0)
             {
-                throw new Exception(GetErrorString(NativeMethods.GetLastError()));
+                throw GetError(NativeMethods.GetLastError());
             }
 
         }
@@ -197,6 +199,10 @@ namespace WindowController
             }
         }
 
+        /// <summary>
+        /// Window を起動しているプロセス名を取得
+        /// </summary>
+        /// <returns></returns>
         public string GetProcessName()
         {
             if (this.HWnd == IntPtr.Zero) return null;
@@ -205,15 +211,10 @@ namespace WindowController
 
             if (pid == UIntPtr.Zero) return null;
 
-            // using (var process = Process.GetProcessById((int)pid.ToUInt32()))
-            // {
-            //     return process.ProcessName;                
-            // }
-
             var hnd = NativeMethods.OpenProcess((ProcessAccessRights.PROCESS_QUERY_INFORMATION|ProcessAccessRights.PROCESS_VM_READ), false, pid.ToUInt32());
             if (hnd == IntPtr.Zero)
             {
-                throw new Exception(GetErrorString(NativeMethods.GetLastError()));
+                throw GetError(NativeMethods.GetLastError());
             }
 
             try
@@ -222,7 +223,7 @@ namespace WindowController
                 uint ret = NativeMethods.GetModuleBaseName(hnd, IntPtr.Zero, buffer, (uint)buffer.Capacity);
                 if (ret == 0)
                 {
-                    throw new Exception(GetErrorString(NativeMethods.GetLastError()));
+                    throw GetError(NativeMethods.GetLastError());
                 }
 
                 return buffer.ToString();
@@ -262,7 +263,7 @@ namespace WindowController
             bool ret = NativeMethods.GetWindowInfo(_hWnd, ref wi);
             if (!ret)
             {
-                throw new Exception(GetErrorString(NativeMethods.GetLastError()));
+                throw GetError(NativeMethods.GetLastError());
             }
             return wi;
         }
