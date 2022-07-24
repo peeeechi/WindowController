@@ -1,3 +1,6 @@
-/bin
-/obj
+/src/bin
+/src/obj
 /.vscode
+/test/TestResults
+/test/bin
+/test/obj

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using static System.Threading.Thread;
@@ -9,17 +8,83 @@ using static System.Threading.Thread;
 
 namespace WindowController
 {
-    public class WindowController
+    public interface IWindowController
+    {
+        /// <summary>
+        /// Window Handle を取得します
+        /// </summary>
+        IntPtr HWnd { get; set; }
+       
+        /// <summary>
+        /// クラス名を取得します
+        /// </summary>
+        /// <param name="hWnd">取得する</param>
+        /// <param name="maxTextLength"></param>
+        /// <returns></returns>
+        string GetClassName(int maxTextLength = WindowControllerConst.MAX_TEXT_LENGTH);     
+
+        /// <summary>
+        /// Windowの矩形情報を取得します
+        /// </summary>
+        /// <returns></returns>
+        RECT GetRect();
+
+        /// <summary>
+        /// このWindowのテキストを読み取ります
+        /// </summary>
+        /// <param name="flags"></param>
+        /// <param name="timeout"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        string GetWindowText(SendMessageTimeoutFlgs flags = SendMessageTimeoutFlgs.SMTO_BLOCK, UInt32 timeout = WindowControllerConst.TIMEOUT_MSEC);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="flags"></param>
+        /// <param name="timeout"></param>
+        void SendClickMessage();
+
+        void ClickEmulate(int? waitTimeMs = null);
+
+        /// <summary>
+        /// SendMessage によるテキスト入力を行います
+        /// </summary>
+        /// <param name="sendText"></param>
+        /// <param name="flags"></param>
+        /// <param name="timeout"></param>
+        /// <exception cref="Exception"></exception>
+        void SendSetTextMessage(string sendText, SendMessageTimeoutFlgs flags = SendMessageTimeoutFlgs.SMTO_NORMAL, UInt32 timeout = WindowControllerConst.TIMEOUT_MSEC);
+
+        bool ToForeground();
+
+        /// <summary>
+        /// Window を起動しているプロセス名を取得
+        /// </summary>
+        /// <returns></returns>
+        string GetProcessName();
+
+        /// <summary>
+        /// 自身のWindowHandleをもつWindowが存在する(=有効な場合)場合はtrue
+        /// </summary>
+        /// <returns></returns>
+        bool Exist();
+
+        WindowController GetParentWindow(GaFlags flags=GaFlags.GA_PARENT);
+
+        WINDOWINFO GetWindowInfo();
+    }
+
+    public class WindowController: IWindowController
     {
         public WindowController() {}
         public WindowController(IntPtr hwnd) 
         {
             this._hWnd = hwnd;
         }
-        const int MAX_TEXT_LENGTH = 500;
-        const UInt32 TIMEOUT_MSEC = 1000;
 
-        private IntPtr _hWnd = IntPtr.Zero;
+
+        protected IntPtr _hWnd = IntPtr.Zero;
         /// <summary>
         /// Window Handle を取得します
         /// </summary>
@@ -35,7 +100,7 @@ namespace WindowController
         /// <param name="errorCode"></param>
         /// <param name="methodName"></param>
         /// <returns></returns>
-        private WinApiException GetError(uint errorCode, [CallerMemberName] string methodName = "", [CallerLineNumber] int lineNumber = 0, [CallerFilePath] string targetFile = "")
+        protected WinApiException GetError(uint errorCode, [CallerMemberName] string methodName = "", [CallerLineNumber] int lineNumber = 0, [CallerFilePath] string targetFile = "")
         {
             StringBuilder st = new StringBuilder(500);
             uint errorMessageLength = NativeMethods.FormatMessage(FormatMessageFlgs.FORMAT_MESSAGE_FROM_SYSTEM, IntPtr.Zero, errorCode, 0, st, (uint)st.Capacity, null);
@@ -59,7 +124,7 @@ namespace WindowController
         /// <param name="hWnd">取得する</param>
         /// <param name="maxTextLength"></param>
         /// <returns></returns>
-        public string GetClassName(int maxTextLength = MAX_TEXT_LENGTH)
+        public string GetClassName(int maxTextLength = WindowControllerConst.MAX_TEXT_LENGTH)
         {
             if (this._hWnd == IntPtr.Zero) return string.Empty;
 
@@ -98,7 +163,7 @@ namespace WindowController
         /// <param name="timeout"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        public string GetWindowText(SendMessageTimeoutFlgs flags = SendMessageTimeoutFlgs.SMTO_BLOCK, UInt32 timeout = TIMEOUT_MSEC)
+        public string GetWindowText(SendMessageTimeoutFlgs flags = SendMessageTimeoutFlgs.SMTO_BLOCK, UInt32 timeout = WindowControllerConst.TIMEOUT_MSEC)
         {
             if (this._hWnd == IntPtr.Zero) return string.Empty;
 
@@ -112,6 +177,7 @@ namespace WindowController
             var ret = new IntPtr(0);
             int text_length = 0;
             var is_success = (int)NativeMethods.SendMessageTimeout(_hWnd, WindowsMessage.WM_GETTEXTLENGTH, IntPtr.Zero, IntPtr.Zero, flags, timeout, ref ret);
+            // var is_success = (int)NativeMethods.SendNotifyMessage(_hWnd, WindowsMessage.WM_GETTEXTLENGTH, IntPtr.Zero, IntPtr.Zero);
 
             //Debug.WriteLine($"ret: {ret}, return: {is_success}");
 
@@ -172,9 +238,9 @@ namespace WindowController
         /// <param name="flags"></param>
         /// <param name="timeout"></param>
         /// <exception cref="Exception"></exception>
-        public void SendSetTextMessage(string sendText, SendMessageTimeoutFlgs flags = SendMessageTimeoutFlgs.SMTO_NORMAL, UInt32 timeout = TIMEOUT_MSEC)
+        public void SendSetTextMessage(string sendText, SendMessageTimeoutFlgs flags = SendMessageTimeoutFlgs.SMTO_NORMAL, UInt32 timeout = WindowControllerConst.TIMEOUT_MSEC)
         {
-            var ret = new IntPtr(0);
+            var ret = IntPtr.Zero;
             StringBuilder tsb = new StringBuilder(sendText);
 
 
@@ -259,7 +325,7 @@ namespace WindowController
         public WINDOWINFO GetWindowInfo()
         {
             var wi = new WINDOWINFO();
-            wi.cbSize = Marshal.SizeOf(wi);  // sizeof(WINDOWINFO);でもよいようだが sizeof()を使う場合は unsafe{}が必要
+            wi.cbSize = Marshal.SizeOf(wi);
             bool ret = NativeMethods.GetWindowInfo(_hWnd, ref wi);
             if (!ret)
             {
@@ -293,6 +359,47 @@ namespace WindowController
             hWnd = NativeMethods.ChildWindowFromPoint(hWnd, p);
 
             return (hWnd == IntPtr.Zero) ? null : new WindowController(hWnd);
+        }
+
+        protected List<WindowController> FindChildren(Func<WindowController, bool> conditions)
+        {
+            List<WindowController> list = new List<WindowController>();
+            if (this.HWnd == IntPtr.Zero)
+                return list;
+            
+
+            EnumWindowsDelegate handler = null;
+            handler = new EnumWindowsDelegate((hWnd, lpParam) => {
+                if (hWnd == IntPtr.Zero) return true;
+    
+                var controller = new WindowController(hWnd);
+                if (conditions(controller)) list.Add(controller);
+
+                NativeMethods.EnumChildWindows(hWnd, handler, lpParam);    
+                return true;
+            });
+
+            NativeMethods.EnumChildWindows(this.HWnd, handler, IntPtr.Zero);    
+
+            return list;
+        }
+
+        public List<WindowController> FindChildrenByTitle(string title)
+        {
+            return this.FindChildren((controller) => WindowControllerUtil.IsMatchTitle(controller, title));
+        }
+
+        public List<WindowController> FindChildrenByRect(RECT rect, double scaleRate=1.0)
+        {
+            var target = new RECT
+            {
+                left = Convert.ToInt32((double)rect.left * scaleRate),
+                top = Convert.ToInt32((double)rect.top * scaleRate),
+                right = Convert.ToInt32((double)rect.right * scaleRate),
+                bottom = Convert.ToInt32((double)rect.bottom * scaleRate),
+            };
+
+            return this.FindChildren((controller) => WindowControllerUtil.IsWithinRectRange(controller, rect));
         }
     }
 }

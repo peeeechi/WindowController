@@ -278,7 +278,7 @@ namespace WindowController
         /// <param name="wParam">追加のメッセージ固有の情報</param>
         /// <param name="lParam">追加のメッセージ固有の情報</param>
         /// <returns>戻り値は、メッセージ処理の結果を指定します<br/>送信されるメッセージによって異なります</returns>
-        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         public extern static IntPtr SendMessage([In] IntPtr hWnd, [In] WindowsMessage Msg, [In] IntPtr wParam, [In] IntPtr lParam);
 
         /// 指定されたメッセージを1つまたは複数のウィンドウに送信します<br/> SendMessage関数は、指定されたウィンドウのウィンドウプロシージャを呼び出し、ウィンドウプロシージャがメッセージを処理するまで戻りません<br/>メッセージを送信してすぐに戻るには、SendMessageCallback関数またはSendNotifyMessage関数を使用します<br/>メッセージをスレッドのメッセージキューに投稿してすぐに返すには、PostMessage関数またはPostThreadMessage関数を使用します
@@ -289,7 +289,7 @@ namespace WindowController
         /// <param name="wParam">追加のメッセージ固有の情報</param>
         /// <param name="lParam">追加のメッセージ固有の情報</param>
         /// <returns>戻り値は、メッセージ処理の結果を指定します<br/>送信されるメッセージによって異なります</returns>
-        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         public extern static IntPtr SendMessage([In] IntPtr hWnd, [In] WindowsMessage Msg, [In] IntPtr wParam, [In, Out] StringBuilder lParam);
 
         /// <summary>
@@ -300,7 +300,7 @@ namespace WindowController
         /// <param name="wParam">追加のメッセージ固有の情報</param>
         /// <param name="lParam">追加のメッセージ固有の情報</param>
         /// <returns>関数が成功した場合、戻り値はゼロ以外です<br/>関数が失敗した場合、戻り値はゼロです<br/>拡張エラー情報を取得するには、GetLastErrorを呼び出します</returns>
-        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         public extern static IntPtr SendNotifyMessage([In] IntPtr hWnd, [In] WindowsMessage Msg, [In] IntPtr wParam, [In] IntPtr lParam);
 
         /// <summary>
