@@ -168,23 +168,20 @@ namespace WindowController
             if (this._hWnd == IntPtr.Zero) return string.Empty;
 
             //var element = AutomationElement.FromHandle(this._hWnd);
-
             //var p = (ValuePattern)element.GetCurrentPattern(ValuePattern.Pattern);
-
             //return p.Current.Value;
-
 
             var ret = new IntPtr(0);
             int text_length = 0;
             var is_success = (int)NativeMethods.SendMessageTimeout(_hWnd, WindowsMessage.WM_GETTEXTLENGTH, IntPtr.Zero, IntPtr.Zero, flags, timeout, ref ret);
-            // var is_success = (int)NativeMethods.SendNotifyMessage(_hWnd, WindowsMessage.WM_GETTEXTLENGTH, IntPtr.Zero, IntPtr.Zero);
-
-            //Debug.WriteLine($"ret: {ret}, return: {is_success}");
 
             if (is_success == 0)
             {
-                throw GetError(NativeMethods.GetLastError());
-                // return null;
+                var err = GetError(NativeMethods.GetLastError());
+                if (err.ErrorCode == 0) // エラーではないとき(文字列の長さが0の場合)
+                {
+                    return string.Empty;
+                }
             }
             else
             {
@@ -192,7 +189,7 @@ namespace WindowController
             }
             StringBuilder tsb = new StringBuilder(text_length);
 
-            IntPtr retCode = NativeMethods.SendMessageTimeout(_hWnd, WindowsMessage.WM_GETTEXT, new IntPtr(text_length), tsb, flags, timeout, ref ret);
+            is_success = (int)NativeMethods.SendMessageTimeout(_hWnd, WindowsMessage.WM_GETTEXT, new IntPtr(text_length), tsb, flags, timeout, ref ret);
 
             if (is_success == 0)
             {
