@@ -8,10 +8,10 @@ namespace WindowControllerTest
 {
 
     [TestClass]
-    public class WindowControllerUtilUnitTest
+    public class WindowControllerUtil_UnitTest
     {
         [TestMethod]
-        public void TestConvertWildcard2Regex()
+        public void Test_ConvertWildcard2Regex()
         {
             var expected = new Regex("^.*test.*$");
    
@@ -22,7 +22,7 @@ namespace WindowControllerTest
         }
 
         [TestMethod]
-        public void TestIsMatchTitle()
+        public void Test_IsMatchTitle()
         {
             var expected_matches = new List<string>
             {
@@ -62,7 +62,7 @@ namespace WindowControllerTest
         }
 
         [TestMethod]
-        public void TestIsWithinRectRange_PositiveSide()
+        public void Test_IsWithinRectRange_PositiveSide()
         {
             var targetRect = new WindowController.RECT
             {
@@ -108,7 +108,7 @@ namespace WindowControllerTest
         }
 
         [TestMethod]
-        public void TestIsWithinRectRange_NegativeSide()
+        public void Test_IsWithinRectRange_NegativeSide()
         {
             var targetRect = new WindowController.RECT
             {

@@ -63,5 +63,24 @@ namespace WindowController
                 && centerDiffX <= widthDiff
                 && centerDiffY <= heightDiff);
         }
+
+        public static bool IsWithinRectRange_Rate(IWindowController controller, RECT compared)
+        {
+            if (controller == null) return false;                
+            
+            var target = controller.GetRect();
+
+            var targetCenter = target.center;
+            var comparedCenter = compared.center;
+            var widthDiff = compared.width - target.width;
+            var heightDiff = compared.height - target.height;
+            var centerDiffX = Math.Abs(comparedCenter.x - targetCenter.x);
+            var centerDiffY = Math.Abs(comparedCenter.y - targetCenter.y);
+
+            return (widthDiff >= 0
+                && heightDiff >= 0
+                && centerDiffX <= widthDiff
+                && centerDiffY <= heightDiff);
+        }
     }
 }
