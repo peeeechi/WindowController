@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using static System.Threading.Thread;
@@ -270,8 +271,14 @@ namespace WindowController
         {
             if (this.HWnd == IntPtr.Zero) return null;
             
-            int threadId = NativeMethods.GetWindowThreadProcessId(this.HWnd, out UIntPtr pid);
+            var process = System.Diagnostics.Process.GetProcesses().First(p => p.Handle == this.HWnd);
 
+            if (process != null)
+            {
+                return process.ProcessName;                
+            }
+
+            int threadId = NativeMethods.GetWindowThreadProcessId(this.HWnd, out UIntPtr pid);
             if (pid == UIntPtr.Zero) return null;
 
             var hnd = NativeMethods.OpenProcess((ProcessAccessRights.PROCESS_QUERY_INFORMATION|ProcessAccessRights.PROCESS_VM_READ), false, pid.ToUInt32());
